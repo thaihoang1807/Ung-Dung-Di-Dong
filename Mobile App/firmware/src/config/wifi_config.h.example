@@ -1,0 +1,50 @@
+/**
+ * WiFi and Firebase Configuration Template
+ * 
+ * Copy this file to wifi_config.h and fill in your credentials
+ * 
+ * cp wifi_config.h.example wifi_config.h
+ */
+
+#ifndef WIFI_CONFIG_H
+#define WIFI_CONFIG_H
+
+// ============================================
+// WiFi Credentials
+// ============================================
+#define WIFI_SSID "YOUR_WIFI_SSID"
+#define WIFI_PASSWORD "YOUR_WIFI_PASSWORD"
+
+// ============================================
+// Firebase Configuration
+// ============================================
+#define FIREBASE_HOST "YOUR_PROJECT_ID.firebaseio.com"
+#define FIREBASE_AUTH "YOUR_FIREBASE_DATABASE_SECRET"
+
+// ============================================
+// Device Configuration
+// ============================================
+#define PLANT_ID "plant_001"
+
+// ============================================
+// Pin Configuration
+// ============================================
+#define SOIL_MOISTURE_PIN 34
+#define DHT_PIN 4
+#define RELAY_PIN 5
+
+// ============================================
+// Sensor Calibration
+// ============================================
+#define SOIL_DRY_VALUE 3000
+#define SOIL_WET_VALUE 1000
+
+// ============================================
+// Timing Configuration
+// ============================================
+#define SENSOR_READ_INTERVAL 5000
+#define FIREBASE_SYNC_INTERVAL 5000
+#define PUMP_AUTO_OFF_TIMEOUT 30000
+
+#endif
+
