@@ -181,65 +181,6 @@ Mobile App/
             └── firebase_client.cpp                        [Tiến]
 ```
 
-## 🚀 Hướng dẫn cài đặt
-
-### Yêu cầu hệ thống
-
-**Mobile App:**
-- Flutter SDK >= 3.0.0
-- Dart SDK >= 3.0.0
-- Android Studio / VS Code
-- Android SDK hoặc Xcode (cho iOS)
-
-**Firmware:**
-- PlatformIO Core hoặc PlatformIO IDE
-- USB driver cho ESP32
-
-**Backend:**
-- Tài khoản Firebase (miễn phí)
-
-### 1. Clone Repository
-
-```bash
-git clone <repository-url>
-cd "Mobile App"
-```
-
-### 2. Setup Flutter App
-
-```bash
-cd mobile_app
-
-# Cài đặt dependencies
-flutter pub get
-
-# Kiểm tra thiết bị
-flutter devices
-
-# Chạy app (Debug mode)
-flutter run
-
-# Build APK (Release)
-flutter build apk --release
-```
-
-### 3. Setup Firebase
-
-1. Tạo project tại [Firebase Console](https://console.firebase.google.com/)
-2. Enable các services:
-   - Authentication (Email/Password)
-   - Cloud Firestore
-   - Storage
-   - Cloud Messaging
-3. Tải file config:
-   - Android: `google-services.json` → `mobile_app/android/app/`
-   - iOS: `GoogleService-Info.plist` → `mobile_app/ios/Runner/`
-4. Chạy FlutterFire CLI:
-   ```bash
-   dart pub global activate flutterfire_cli
-   flutterfire configure
-   ```
-
 
 ## 🔧 Công nghệ sử dụng
 
