@@ -240,27 +240,6 @@ flutter build apk --release
    flutterfire configure
    ```
 
-### 4. Setup ESP32 Firmware
-
-```bash
-cd firmware
-
-# Cài đặt PlatformIO (nếu chưa có)
-pip install platformio
-
-# Cài đặt dependencies
-pio lib install
-
-# Cấu hình WiFi và Firebase
-cp src/config/wifi_config.h.example src/config/wifi_config.h
-# Edit wifi_config.h với thông tin của bạn
-
-# Build và upload
-pio run --target upload
-
-# Monitor serial output
-pio device monitor
-```
 
 ## 🔧 Công nghệ sử dụng
 
@@ -438,18 +417,9 @@ flutter run
 
 ## 📝 License
 
-MIT License - Dự án học tập
-
-## 🙏 Acknowledgments
-
-- Flutter Team
-- Firebase Team
-- PlatformIO Community
-- Các thư viện mã nguồn mở
+MIT License - Dự án Ứng Dụng Di Động
 
 ---
 
-**Lưu ý**: Đây là project học tập. Vui lòng tham khảo file CONTRIBUTION.md trong `docs/` để xem chi tiết công việc của từng thành viên.
 
-**Last Updated**: 2024
 
