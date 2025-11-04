@@ -13,18 +13,18 @@ dependencies:
   # State Management
   provider: ^6.1.1
 
-  # Firebase
-  firebase_core: ^2.24.2
-  firebase_auth: ^4.16.0
-  cloud_firestore: ^4.14.0
-  firebase_storage: ^11.6.0
-  firebase_messaging: ^14.7.9
+  # Firebase (ĐÃ SỬA LỖI XUNG ĐỘT PHIÊN BẢN)
+  firebase_core: ^2.32.0
+  firebase_auth: ^4.20.0
+  cloud_firestore: ^4.17.3
+  firebase_storage: ^11.7.5
+  firebase_messaging: ^14.9.2
 
   # UI/UX
   cupertino_icons: ^1.0.6
 
   # Charts for statistics
-  fl_chart: ^0.66.0
+  fl_chart: ^0.68.0
 
   # Image handling
   image_picker: ^1.0.7
@@ -34,6 +34,8 @@ dependencies:
   intl: ^0.18.1
   uuid: ^4.3.3
 
+  flutter_local_notifications: ^17.2.1
+  
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -54,4 +56,3 @@ flutter:
   #       - asset: assets/fonts/CustomFont-Regular.ttf
   #       - asset: assets/fonts/CustomFont-Bold.ttf
   #         weight: 700
-
