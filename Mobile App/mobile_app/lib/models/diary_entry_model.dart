@@ -1,83 +1,42 @@
+// File: lib/models/diary_entry_model.dart
+
+import 'package:cloud_firestore/cloud_firestore.dart';
+
 class DiaryEntryModel {
-  final String id;
-  final String plantId;
-  final String userId;
-  final String content;
-  final List<String> imageUrls;
-  final String activityType; // watering, fertilizing, pruning, observation
-  final DateTime createdAt;
-  final DateTime updatedAt;
+  final String? id; // ID từ Firestore
+  final String title;
+  final String notes;
+  final String activityType; // 'watering', 'fertilizing', v.v.
+  final DateTime? timestamp;
 
   DiaryEntryModel({
-    required this.id,
-    required this.plantId,
-    required this.userId,
-    required this.content,
-    required this.imageUrls,
+    this.id,
+    required this.title,
+    required this.notes,
     required this.activityType,
-    required this.createdAt,
-    required this.updatedAt,
+    this.timestamp,
   });
 
-  // Convert to Map for Firestore
-  Map<String, dynamic> toMap() {
+  // 1. HÀM ĐỂ ĐỌC TỪ FIRESTORE
+  factory DiaryEntryModel.fromFirestore(DocumentSnapshot doc) {
+    Map<String, dynamic> data = doc.data() as Map<String, dynamic>;
+    return DiaryEntryModel(
+      id: doc.id,
+      title: data['title'] ?? 'Không có tiêu đề',
+      notes: data['notes'] ?? '',
+      activityType: data['activityType'] ?? 'unknown',
+      timestamp: (data['timestamp'] as Timestamp?)?.toDate(),
+    );
+  }
+
+  // 2. HÀM ĐỂ GHI LÊN FIRESTORE
+  Map<String, dynamic> toFirestore() {
     return {
-      'id': id,
-      'plantId': plantId,
-      'userId': userId,
-      'content': content,
-      'imageUrls': imageUrls,
+      'title': title,
+      'notes': notes,
       'activityType': activityType,
-      'createdAt': createdAt.toIso8601String(),
-      'updatedAt': updatedAt.toIso8601String(),
+      // (Không cần thêm plantId, userId, timestamp ở đây
+      // vì provider sẽ tự động thêm vào)
     };
   }
-
-  // Create from Firestore document
-  factory DiaryEntryModel.fromMap(Map<String, dynamic> map) {
-    return DiaryEntryModel(
-      id: map['id'] ?? '',
-      plantId: map['plantId'] ?? '',
-      userId: map['userId'] ?? '',
-      content: map['content'] ?? '',
-      imageUrls: List<String>.from(map['imageUrls'] ?? []),
-      activityType: map['activityType'] ?? 'observation',
-      createdAt: DateTime.parse(map['createdAt']),
-      updatedAt: DateTime.parse(map['updatedAt']),
-    );
-  }
-
-  // CopyWith method
-  DiaryEntryModel copyWith({
-    String? id,
-    String? plantId,
-    String? userId,
-    String? content,
-    List<String>? imageUrls,
-    String? activityType,
-    DateTime? createdAt,
-    DateTime? updatedAt,
-  }) {
-    return DiaryEntryModel(
-      id: id ?? this.id,
-      plantId: plantId ?? this.plantId,
-      userId: userId ?? this.userId,
-      content: content ?? this.content,
-      imageUrls: imageUrls ?? this.imageUrls,
-      activityType: activityType ?? this.activityType,
-      createdAt: createdAt ?? this.createdAt,
-      updatedAt: updatedAt ?? this.updatedAt,
-    );
-  }
 }
-
-// Activity Types Enum
-class ActivityType {
-  static const String watering = 'watering';
-  static const String fertilizing = 'fertilizing';
-  static const String pruning = 'pruning';
-  static const String observation = 'observation';
-  
-  static List<String> get all => [watering, fertilizing, pruning, observation];
-}
-

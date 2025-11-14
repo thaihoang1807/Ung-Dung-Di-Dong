@@ -1,3 +1,5 @@
+// File: mobile_app/lib/providers/notification_provider.dart
+
 import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
@@ -6,7 +8,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
 
-// --- (PHẦN TỪ CODE CŨ CỦA BẠN) ---
+// --- (Model dữ liệu) ---
 class NotificationModel {
   final String id;
   final String title;
@@ -29,11 +31,10 @@ class NotificationModel {
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
   print("🔔 Handling a background message: ${message.messageId}");
-  // Bạn có thể khởi tạo Firebase ở đây nếu cần
 }
 
 class NotificationProvider with ChangeNotifier {
-  // --- (TỪ CODE CŨ) ---
+  // --- (Các biến State) ---
   List<NotificationModel> _notifications = [];
   bool _isLoading = false;
   String? _error;
@@ -47,45 +48,37 @@ class NotificationProvider with ChangeNotifier {
   String? get error => _error;
   String? get fcmToken => _fcmToken;
 
-  // --- (PHẦN MỚI THÊM VÀO) ---
-  // Các dịch vụ
+  // --- (Các dịch vụ) ---
   final FirebaseMessaging _messaging = FirebaseMessaging.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FlutterLocalNotificationsPlugin _localNotifications =
       FlutterLocalNotificationsPlugin();
 
-  // Dịch vụ lắng nghe
   StreamSubscription? _sensorListener;
 
   // Ngưỡng cảnh báo
   static const double SOIL_HUMIDITY_LOW = 30.0;
   static const double TEMP_HIGH = 35.0;
 
-  // Tránh spam
   DateTime? _lastHumidityAlert;
   DateTime? _lastTempAlert;
 
-  /// 1. Khởi tạo tất cả dịch vụ
+  /// 1. Khởi tạo (Không tự động lắng nghe)
   Future<void> initialize() async {
     _isLoading = true;
     notifyListeners();
     try {
-      // 1.1 Khởi tạo "cái chuông" (Local Notifications)
       await _initializeLocalNotifications();
-
-      // 1.2 Khởi tạo FCM (Task 4.2)
       await requestPermission();
       await _getToken();
       FirebaseMessaging.onBackgroundMessage(
           _firebaseMessagingBackgroundHandler);
 
-      // 1.3 Lắng nghe thông báo khi app đang mở
       FirebaseMessaging.onMessage.listen((RemoteMessage message) {
         if (message.notification != null) {
           print(
               'Nhận được thông báo (foreground): ${message.notification!.title}');
-          // Hiển thị thông báo lên màn hình
           showLocalAlert(
             title: message.notification!.title ?? 'Thông báo mới',
             body: message.notification!.body ?? '',
@@ -95,8 +88,8 @@ class NotificationProvider with ChangeNotifier {
         }
       });
 
-      // 1.4 Bắt đầu lắng nghe cảm biến (Task 4.3)
-      startSensorListening();
+      // KHÔNG TỰ ĐỘNG LẮNG NGHE NỮA
+      // startSensorListening();
 
       _isLoading = false;
       _error = null;
@@ -125,9 +118,8 @@ class NotificationProvider with ChangeNotifier {
     await _localNotifications.initialize(
       settings,
       onDidReceiveNotificationResponse: (NotificationResponse response) {
-        // Xử lý khi người dùng nhấn vào thông báo
         print("Notification tapped with payload: ${response.payload}");
-        // TODO: Điều hướng đến màn hình chi tiết cây
+        // TODO: Điều hướng
       },
     );
   }
@@ -143,7 +135,7 @@ class NotificationProvider with ChangeNotifier {
         );
         return settings.authorizationStatus == AuthorizationStatus.authorized;
       }
-      return true; // Android tự cấp quyền (dưới 13)
+      return true;
     } catch (e) {
       _error = e.toString();
       return false;
@@ -156,7 +148,6 @@ class NotificationProvider with ChangeNotifier {
       _fcmToken = await _messaging.getToken();
       print("✅ FCM Token: $_fcmToken");
 
-      // Lưu token vào Firestore
       if (_fcmToken != null) {
         final userId = _auth.currentUser?.uid;
         if (userId != null) {
@@ -175,20 +166,17 @@ class NotificationProvider with ChangeNotifier {
     }
   }
 
-  /// 5. Bắt đầu lắng nghe cảm biến (Task 4.3)
-  void startSensorListening() {
-    stopSensorListening(); // Dừng listener cũ (nếu có)
+  /// 5. Bắt đầu lắng nghe (ĐÃ SỬA LỖI HARDCODE)
+  void startSensorListening({required String plantId}) {
+    stopSensorListening(); // Dừng listener cũ
     final userId = _auth.currentUser?.uid;
     if (userId == null) return;
 
-    print("✅ Bắt đầu lắng nghe dữ liệu cảm biến (Client-side)...");
-
-    // TODO: Sửa logic này để lắng nghe đúng cây người dùng
-    const String mockPlantId = "plant_123";
+    print("✅ Bắt đầu lắng nghe dữ liệu cây: $plantId");
 
     final docStream = _firestore
         .collection('iot_data')
-        .doc(mockPlantId)
+        .doc(plantId) // <--- Dùng plantId thật
         .collection('sensor_readings')
         .orderBy('timestamp', descending: true)
         .limit(1)
@@ -211,7 +199,6 @@ class NotificationProvider with ChangeNotifier {
 
   /// 7. Kiểm tra dữ liệu và Kích hoạt thông báo
   void _checkSensorData(Map<String, dynamic> data) {
-    // Lấy dữ liệu (sửa lỗi 'unused_local_variable')
     final double? humidity = data['soilHumidity'] as double?;
     final double? temperature = data['temperature'] as double?;
 
@@ -230,17 +217,16 @@ class NotificationProvider with ChangeNotifier {
       }
     }
 
-    // 2. Kiểm tra nhiệt độ (sửa lỗi 'unused_field')
+    // 2. Kiểm tra nhiệt độ
     if (temperature != null && temperature > TEMP_HIGH) {
       if (_canSendAlert(_lastTempAlert)) {
-        // <--- Sử dụng _lastTempAlert
         print("🚨 CẢNH BÁO: Nhiệt độ cao!");
         showLocalAlert(
           title: "🥵 Nhiệt độ quá cao!",
           body: "Nhiệt độ hiện tại: $temperature°C. Hãy che mát cho cây.",
           type: "alert_temp",
         );
-        _lastTempAlert = DateTime.now(); // <--- Gán giá trị cho _lastTempAlert
+        _lastTempAlert = DateTime.now();
       }
     }
   }
@@ -269,7 +255,6 @@ class NotificationProvider with ChangeNotifier {
     await _localNotifications.show(id, title, body, notificationDetails,
         payload: payload);
 
-    // Thêm vào lịch sử (dùng hàm cũ của bạn)
     addNotification(NotificationModel(
       id: id.toString(),
       title: title,
@@ -279,14 +264,12 @@ class NotificationProvider with ChangeNotifier {
     ));
   }
 
-  // Hàm tránh spam (lấy từ code trước)
   bool _canSendAlert(DateTime? lastAlertTime) {
     if (lastAlertTime == null) return true;
     return DateTime.now().difference(lastAlertTime).inMinutes > 0;
   }
 
-  // --- (CÁC HÀM QUẢN LÝ STATE TỪ CODE CŨ CỦA BẠN - GIỮ NGUYÊN) ---
-
+  // --- (CÁC HÀM QUẢN LÝ STATE TỪ CODE CŨ) ---
   void addNotification(NotificationModel notification) {
     _notifications.insert(0, notification);
     notifyListeners();
@@ -322,6 +305,7 @@ class NotificationProvider with ChangeNotifier {
     notifyListeners();
   }
 
+  // ... (Các hàm deleteNotification, clearAll, clearError giữ nguyên) ...
   void deleteNotification(String notificationId) {
     _notifications.removeWhere((n) => n.id == notificationId);
     notifyListeners();
